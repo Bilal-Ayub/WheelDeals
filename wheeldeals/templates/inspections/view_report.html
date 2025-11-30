@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+
+{% block title %}Inspection Report - {{ inspection.inspection_id }} - WheelDeals{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4"><i class="fas fa-file-alt"></i> Inspection Report</h2>
+    
+    <!-- Inspection Details -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="fas fa-info-circle"></i> Inspection Information</h5>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Inspection ID:</dt>
+                <dd class="col-sm-9"><code>{{ inspection.inspection_id }}</code></dd>
+                
+                <dt class="col-sm-3">Vehicle:</dt>
+                <dd class="col-sm-9">
+                    <a href="{% url 'car_detail' inspection.car.pk %}">
+                        {{ inspection.car.year }} {{ inspection.car.make }} {{ inspection.car.model }}
+                    </a>
+                </dd>
+                
+                <dt class="col-sm-3">Inspector:</dt>
+                <dd class="col-sm-9">{{ inspection.inspector.get_full_name|default:inspection.inspector.username }}</dd>
+                
+                <dt class="col-sm-3">Inspection Date:</dt>
+                <dd class="col-sm-9">{{ report.completed_date|date:"M d, Y \a\t h:i A" }}</dd>
+                
+                <dt class="col-sm-3">Average Rating:</dt>
+                <dd class="col-sm-9">
+                    <strong class="text-primary">{{ report.average_rating|floatformat:1 }} / 5.0</strong>
+                </dd>
+            </dl>
+        </div>
+    </div>
+    
+    <!-- Ratings Summary -->
+    <div class="row mb-4">
+        <!-- Exterior -->
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0"><i class="fas fa-car"></i> Exterior Components</h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <td>Paint Condition:</td>
+                            <td><strong>{{ report.get_paint_condition_display }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Body Condition:</td>
+                            <td><strong>{{ report.get_body_condition_display }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Glass & Windows:</td>
+                            <td><strong>{{ report.get_glass_windows_display }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Lights & Signals:</td>
+                            <td><strong>{{ report.get_lights_signals_display }}</strong></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tires & Wheels -->
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0"><i class="fas fa-dot-circle"></i> Tires & Wheels</h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <td>Tire Condition:</td>
+                            <td><strong>{{ report.get_tire_condition_display }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Wheel/Rim Condition:</td>
+                            <td><strong>{{ report.get_wheel_condition_display }}</strong></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <!-- Mechanical -->
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-danger text-white">
+                    <h6 class="mb-0"><i class="fas fa-cogs"></i> Mechanical Components</h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <td>Engine Condition:</td>
+                            <td><strong>{{ report.get_engine_condition_display }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Transmission:</td>
+                            <td><strong>{{ report.get_transmission_display }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Brake System:</td>
+                            <td><strong>{{ report.get_brakes_display }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Suspension System:</td>
+                            <td><strong>{{ report.get_suspension_display }}</strong></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Interior & Electronics -->
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0"><i class="fas fa-chair"></i> Interior & Electronics</h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <td>Interior Overall:</td>
+                            <td><strong>{{ report.get_interior_condition_display }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Seats & Upholstery:</td>
+                            <td><strong>{{ report.get_seats_upholstery_display }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Dashboard & Controls:</td>
+                            <td><strong>{{ report.get_dashboard_controls_display }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Electronics & Features:</td>
+                            <td><strong>{{ report.get_electronics_display }}</strong></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Photos -->
+    {% if report.photos.all %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0"><i class="fas fa-camera"></i> Inspection Photos</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for photo in report.photos.all %}
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <img src="{{ photo.image.url }}" class="card-img-top" alt="{{ photo.caption }}" style="max-height: 250px; object-fit: cover;">
+                        {% if photo.caption %}
+                        <div class="card-body">
+                            <p class="card-text small">{{ photo.caption }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Overall Assessment -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0"><i class="fas fa-clipboard-check"></i> Overall Assessment</h5>
+        </div>
+        <div class="card-body">
+            {% if report.overall_comments %}
+            <div class="mb-3">
+                <h6>Inspector's Comments:</h6>
+                <p>{{ report.overall_comments|linebreaks }}</p>
+            </div>
+            {% else %}
+            <p class="text-muted">No additional comments provided.</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="d-grid gap-2 mb-5">
+        {% if user == inspection.buyer %}
+        <a href="{% url 'buyer_inspection_status' %}" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i> Back to My Requests
+        </a>
+        {% elif user == inspection.seller %}
+        <a href="{% url 'seller_inspection_requests' %}" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i> Back to Inspection Requests
+        </a>
+        {% elif user == inspection.inspector %}
+        <a href="{% url 'inspector_dashboard' %}" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+        {% endif %}
+        <a href="{% url 'car_detail' inspection.car.pk %}" class="btn btn-secondary">
+            <i class="fas fa-car"></i> View Vehicle Listing
+        </a>
+    </div>
+</div>
+{% endblock %}

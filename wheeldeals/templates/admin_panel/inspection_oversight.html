@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Inspection Oversight - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2>Inspection Oversight</h2>
+        </div>
+        <div class="col-md-6 text-end">
+            <div class="btn-group">
+                <a href="?" class="btn btn-sm {% if status_filter == 'all' %}btn-primary{% else %}btn-outline-primary{% endif %}">All</a>
+                <a href="?status=requested" class="btn btn-sm {% if status_filter == 'requested' %}btn-primary{% else %}btn-outline-primary{% endif %}">Requested</a>
+                <a href="?status=accepted" class="btn btn-sm {% if status_filter == 'accepted' %}btn-primary{% else %}btn-outline-primary{% endif %}">Accepted</a>
+                <a href="?status=assigned" class="btn btn-sm {% if status_filter == 'assigned' %}btn-primary{% else %}btn-outline-primary{% endif %}">Assigned</a>
+                <a href="?status=in_progress" class="btn btn-sm {% if status_filter == 'in_progress' %}btn-primary{% else %}btn-outline-primary{% endif %}">In Progress</a>
+                <a href="?status=completed" class="btn btn-sm {% if status_filter == 'completed' %}btn-success{% else %}btn-outline-success{% endif %}">Completed</a>
+                <a href="?status=rejected" class="btn btn-sm {% if status_filter == 'rejected' %}btn-danger{% else %}btn-outline-danger{% endif %}">Rejected</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Inspection ID</th>
+                    <th>Car</th>
+                    <th>Buyer</th>
+                    <th>Seller</th>
+                    <th>Inspector</th>
+                    <th>Status</th>
+                    <th>Requested Date</th>
+                    <th>Scheduled Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for inspection in inspections %}
+                <tr>
+                    <td><code>{{ inspection.inspection_id }}</code></td>
+                    <td>{{ inspection.car.year }} {{ inspection.car.make }} {{ inspection.car.model }}</td>
+                    <td>{{ inspection.buyer.get_full_name|default:inspection.buyer.username }}</td>
+                    <td>{{ inspection.car.seller.get_full_name|default:inspection.car.seller.username }}</td>
+                    <td>
+                        {% if inspection.inspector %}
+                        {{ inspection.inspector.get_full_name|default:inspection.inspector.username }}
+                        {% else %}
+                        <span class="text-muted">Not assigned</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge 
+                            {% if inspection.status == 'completed' %}bg-success
+                            {% elif inspection.status == 'rejected' %}bg-danger
+                            {% elif inspection.status == 'in_progress' %}bg-warning
+                            {% elif inspection.status == 'assigned' %}bg-info
+                            {% else %}bg-secondary{% endif %}">
+                            {{ inspection.get_status_display }}
+                        </span>
+                    </td>
+                    <td>{{ inspection.requested_date|date:"M d, Y" }}</td>
+                    <td>{{ inspection.scheduled_date|date:"M d, Y"|default:"-" }}</td>
+                    <td>
+                        {% if inspection.status in 'assigned,in_progress' %}
+                        <a href="{% url 'admin_reassign_inspector' inspection.inspection_id %}" class="btn btn-sm btn-warning">
+                            <i class="fas fa-exchange-alt"></i> Reassign
+                        </a>
+                        {% endif %}
+                        {% if inspection.status == 'completed' %}
+                        <a href="{% url 'view_inspection_report' inspection.inspection_id %}" class="btn btn-sm btn-success" target="_blank">
+                            <i class="fas fa-file-alt"></i> View Report
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    {% if not inspections %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> No inspections found for the selected filter.
+    </div>
+    {% endif %}
+    
+    <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary mt-3">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+{% endblock %}

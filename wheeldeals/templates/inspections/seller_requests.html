@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}My Inspection Requests - WheelDeals{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4"><i class="fas fa-clipboard-list"></i> Inspection Requests for My Listings</h2>
+    
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    {% if requests %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Inspection ID</th>
+                    <th>Vehicle</th>
+                    <th>Buyer</th>
+                    <th>Request Date</th>
+                    <th>Status</th>
+                    <th>Scheduled</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for inspection in requests %}
+                <tr>
+                    <td><code>{{ inspection.inspection_id }}</code></td>
+                    <td>
+                        <a href="{% url 'car_detail' inspection.car.pk %}">
+                            {{ inspection.car.year }} {{ inspection.car.make }} {{ inspection.car.model }}
+                        </a>
+                    </td>
+                    <td>{{ inspection.buyer.get_full_name|default:inspection.buyer.username }}</td>
+                    <td>{{ inspection.requested_date|date:"M d, Y" }}</td>
+                    <td>
+                        {% if inspection.status == 'requested' %}
+                        <span class="badge bg-warning text-dark">Pending</span>
+                        {% elif inspection.status == 'accepted' %}
+                        <span class="badge bg-info">Accepted</span>
+                        {% elif inspection.status == 'rejected' %}
+                        <span class="badge bg-danger">Rejected</span>
+                        {% elif inspection.status == 'scheduled' %}
+                        <span class="badge bg-primary">Scheduled</span>
+                        {% elif inspection.status == 'assigned' %}
+                        <span class="badge bg-secondary">Assigned to Inspector</span>
+                        {% elif inspection.status == 'in_progress' %}
+                        <span class="badge bg-info">In Progress</span>
+                        {% elif inspection.status == 'completed' %}
+                        <span class="badge bg-success">Completed</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if inspection.scheduled_date %}
+                        {{ inspection.scheduled_date|date:"M d, Y" }}<br>
+                        <small class="text-muted">{{ inspection.get_scheduled_time_slot_display }}</small>
+                        {% else %}
+                        <span class="text-muted">Not scheduled</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if inspection.status == 'requested' %}
+                        <a href="{% url 'accept_inspection' inspection.inspection_id %}" class="btn btn-success btn-sm">
+                            <i class="fas fa-check"></i> Accept
+                        </a>
+                        <a href="{% url 'reject_inspection' inspection.inspection_id %}" class="btn btn-danger btn-sm">
+                            <i class="fas fa-times"></i> Reject
+                        </a>
+                        {% elif inspection.status == 'rejected' %}
+                        <small class="text-muted">Reason: {{ inspection.rejection_reason }}</small>
+                        {% else %}
+                        <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> No inspection requests yet. Buyers can request inspections from your car listings.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

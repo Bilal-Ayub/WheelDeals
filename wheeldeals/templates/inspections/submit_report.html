@@ -1,0 +1,365 @@
+{% extends 'base.html' %}
+
+{% block title %}Submit Inspection Report - WheelDeals{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4"><i class="fas fa-file-alt"></i> Submit Inspection Report</h2>
+    
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- Inspection Details -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="fas fa-info-circle"></i> Inspection Details</h5>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Inspection ID:</dt>
+                <dd class="col-sm-9"><code>{{ inspection.inspection_id }}</code></dd>
+                
+                <dt class="col-sm-3">Vehicle:</dt>
+                <dd class="col-sm-9">
+                    <a href="{% url 'car_detail' inspection.car.pk %}">
+                        {{ inspection.car.year }} {{ inspection.car.make }} {{ inspection.car.model }}
+                    </a>
+                </dd>
+                
+                <dt class="col-sm-3">Scheduled Date:</dt>
+                <dd class="col-sm-9">{{ inspection.scheduled_date|date:"M d, Y" }} at {{ inspection.get_scheduled_time_slot_display }}</dd>
+                
+                <dt class="col-sm-3">Buyer:</dt>
+                <dd class="col-sm-9">{{ inspection.buyer.get_full_name|default:inspection.buyer.username }}</dd>
+                
+                <dt class="col-sm-3">Seller:</dt>
+                <dd class="col-sm-9">{{ inspection.seller.get_full_name|default:inspection.seller.username }}</dd>
+            </dl>
+        </div>
+    </div>
+    
+    <!-- Report Form -->
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- Exterior Components -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-car"></i> Exterior Components</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><strong>{{ form.paint_condition.label }}</strong></label>
+                        <div class="rating-options">
+                            {% for radio in form.paint_condition %}
+                            <div class="form-check">
+                                {{ radio.tag }}
+                                <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                    {{ radio.choice_label }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {{ form.paint_condition.errors }}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><strong>{{ form.body_condition.label }}</strong></label>
+                        <div class="rating-options">
+                            {% for radio in form.body_condition %}
+                            <div class="form-check">
+                                {{ radio.tag }}
+                                <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                    {{ radio.choice_label }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {{ form.body_condition.errors }}
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><strong>{{ form.glass_windows.label }}</strong></label>
+                        <div class="rating-options">
+                            {% for radio in form.glass_windows %}
+                            <div class="form-check">
+                                {{ radio.tag }}
+                                <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                    {{ radio.choice_label }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {{ form.glass_windows.errors }}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><strong>{{ form.lights_signals.label }}</strong></label>
+                        <div class="rating-options">
+                            {% for radio in form.lights_signals %}
+                            <div class="form-check">
+                                {{ radio.tag }}
+                                <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                    {{ radio.choice_label }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {{ form.lights_signals.errors }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tires & Wheels -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0"><i class="fas fa-dot-circle"></i> Tires & Wheels</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><strong>{{ form.tire_condition.label }}</strong></label>
+                        <div class="rating-options">
+                            {% for radio in form.tire_condition %}
+                            <div class="form-check">
+                                {{ radio.tag }}
+                                <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                    {{ radio.choice_label }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {{ form.tire_condition.errors }}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><strong>{{ form.wheel_condition.label }}</strong></label>
+                        <div class="rating-options">
+                            {% for radio in form.wheel_condition %}
+                            <div class="form-check">
+                                {{ radio.tag }}
+                                <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                    {{ radio.choice_label }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {{ form.wheel_condition.errors }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mechanical Components -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-cogs"></i> Mechanical Components</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><strong>{{ form.engine_condition.label }}</strong></label>
+                        <div class="rating-options">
+                            {% for radio in form.engine_condition %}
+                            <div class="form-check">
+                                {{ radio.tag }}
+                                <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                    {{ radio.choice_label }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {{ form.engine_condition.errors }}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><strong>{{ form.transmission.label }}</strong></label>
+                        <div class="rating-options">
+                            {% for radio in form.transmission %}
+                            <div class="form-check">
+                                {{ radio.tag }}
+                                <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                    {{ radio.choice_label }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {{ form.transmission.errors }}
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><strong>{{ form.brakes.label }}</strong></label>
+                        <div class="rating-options">
+                            {% for radio in form.brakes %}
+                            <div class="form-check">
+                                {{ radio.tag }}
+                                <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                    {{ radio.choice_label }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {{ form.brakes.errors }}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><strong>{{ form.suspension.label }}</strong></label>
+                        <div class="rating-options">
+                            {% for radio in form.suspension %}
+                            <div class="form-check">
+                                {{ radio.tag }}
+                                <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                    {{ radio.choice_label }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {{ form.suspension.errors }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Interior Components -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="fas fa-chair"></i> Interior Components</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label"><strong>{{ form.interior_condition.label }}</strong></label>
+                        <div class="rating-options">
+                            {% for radio in form.interior_condition %}
+                            <div class="form-check">
+                                {{ radio.tag }}
+                                <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                    {{ radio.choice_label }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {{ form.interior_condition.errors }}
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label"><strong>{{ form.seats_upholstery.label }}</strong></label>
+                        <div class="rating-options">
+                            {% for radio in form.seats_upholstery %}
+                            <div class="form-check">
+                                {{ radio.tag }}
+                                <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                    {{ radio.choice_label }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {{ form.seats_upholstery.errors }}
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label"><strong>{{ form.dashboard_controls.label }}</strong></label>
+                        <div class="rating-options">
+                            {% for radio in form.dashboard_controls %}
+                            <div class="form-check">
+                                {{ radio.tag }}
+                                <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                    {{ radio.choice_label }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {{ form.dashboard_controls.errors }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Electronics & Features -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-bolt"></i> Electronics & Features</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label"><strong>{{ form.electronics.label }}</strong></label>
+                    <div class="rating-options">
+                        {% for radio in form.electronics %}
+                        <div class="form-check">
+                            {{ radio.tag }}
+                            <label class="form-check-label" for="{{ radio.id_for_label }}">
+                                {{ radio.choice_label }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {{ form.electronics.errors }}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Photos -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-camera"></i> Inspection Photos</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Upload photos documenting the inspection (up to 10 photos)</p>
+                {{ formset.management_form }}
+                {% for photo_form in formset %}
+                <div class="row mb-3">
+                    <div class="col-md-8">
+                        <label class="form-label">Photo {{ forloop.counter }}</label>
+                        {{ photo_form.image }}
+                        {{ photo_form.image.errors }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Caption</label>
+                        {{ photo_form.caption }}
+                        {{ photo_form.caption.errors }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Overall Assessment -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-clipboard-check"></i> Overall Assessment</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label"><strong>{{ form.overall_comments.label }}</strong></label>
+                    {{ form.overall_comments }}
+                    {{ form.overall_comments.errors }}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Submit Button -->
+        <div class="d-grid gap-2 mb-5">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-check-circle"></i> Submit Inspection Report
+            </button>
+            <a href="{% url 'inspector_dashboard' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Accept Inspection Request - WheelDeals{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-calendar-check"></i> Accept & Schedule Inspection</h4>
+                </div>
+                <div class="card-body">
+                    <h5>Inspection Request Details</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4">Inspection ID:</dt>
+                        <dd class="col-sm-8"><code>{{ inspection.inspection_id }}</code></dd>
+                        
+                        <dt class="col-sm-4">Vehicle:</dt>
+                        <dd class="col-sm-8">
+                            <a href="{% url 'car_detail' inspection.car.pk %}">
+                                {{ inspection.car.year }} {{ inspection.car.make }} {{ inspection.car.model }}
+                            </a>
+                        </dd>
+                        
+                        <dt class="col-sm-4">Buyer:</dt>
+                        <dd class="col-sm-8">{{ inspection.buyer.get_full_name|default:inspection.buyer.username }}</dd>
+                        
+                        <dt class="col-sm-4">Requested:</dt>
+                        <dd class="col-sm-8">{{ inspection.requested_date|date:"M d, Y" }}</dd>
+                    </dl>
+                    
+                    <hr>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.scheduled_date.id_for_label }}" class="form-label">
+                                <i class="fas fa-calendar"></i> Inspection Date <span class="text-danger">*</span>
+                            </label>
+                            {{ form.scheduled_date }}
+                            {% if form.scheduled_date.errors %}
+                            <div class="text-danger small">{{ form.scheduled_date.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">Must be at least 1 day in advance</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.scheduled_time_slot.id_for_label }}" class="form-label">
+                                <i class="fas fa-clock"></i> Time Slot <span class="text-danger">*</span>
+                            </label>
+                            {{ form.scheduled_time_slot }}
+                            {% if form.scheduled_time_slot.errors %}
+                            <div class="text-danger small">{{ form.scheduled_time_slot.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="alert alert-secondary">
+                            <strong><i class="fas fa-dollar-sign"></i> Inspection Cost:</strong> $50.00 (Fixed Rate)<br>
+                            <small class="text-muted">Payment Method: Cash on Delivery</small>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> By accepting this request, you agree to make your vehicle available for inspection at the scheduled time. Payment is cash on delivery.
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-check-circle"></i> Accept & Schedule Inspection
+                            </button>
+                            <a href="{% url 'seller_inspection_requests' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Requests
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

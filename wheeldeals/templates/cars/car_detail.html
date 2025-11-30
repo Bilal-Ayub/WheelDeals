@@ -1,0 +1,319 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ car.year }} {{ car.make }} {{ car.model }} - WheelDeals{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Back button -->
+    <div class="mb-3">
+        <a href="{% url 'car_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Listings
+        </a>
+    </div>
+    
+    <div class="row">
+        <!-- Car Images -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div id="carouselImages" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            {% if car.image1 %}
+                            <div class="carousel-item active">
+                                <img src="{{ car.image1.url }}" class="d-block w-100" style="max-height: 500px; object-fit: cover;" alt="{{ car }}">
+                            </div>
+                            {% endif %}
+                            {% if car.image2 %}
+                            <div class="carousel-item {% if not car.image1 %}active{% endif %}">
+                                <img src="{{ car.image2.url }}" class="d-block w-100" style="max-height: 500px; object-fit: cover;" alt="{{ car }}">
+                            </div>
+                            {% endif %}
+                            {% if car.image3 %}
+                            <div class="carousel-item {% if not car.image1 and not car.image2 %}active{% endif %}">
+                                <img src="{{ car.image3.url }}" class="d-block w-100" style="max-height: 500px; object-fit: cover;" alt="{{ car }}">
+                            </div>
+                            {% endif %}
+                            {% if not car.image1 and not car.image2 and not car.image3 %}
+                            <div class="carousel-item active">
+                                <div class="bg-secondary d-flex align-items-center justify-content-center" style="height: 500px;">
+                                    <i class="fas fa-car fa-10x text-white"></i>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% if car.image1 or car.image2 or car.image3 %}
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselImages" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon"></span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselImages" data-bs-slide="next">
+                            <span class="carousel-control-next-icon"></span>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Car Details -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Vehicle Details</h5>
+                </div>
+                <div class="card-body">
+                    <h2>{{ car.year }} {{ car.make }} {{ car.model }}</h2>
+                    <p class="text-muted"><i class="fas fa-eye"></i> {{ car.views }} views</p>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <table class="table">
+                                <tr>
+                                    <th><i class="fas fa-calendar"></i> Year:</th>
+                                    <td>{{ car.year }}</td>
+                                </tr>
+                                <tr>
+                                    <th><i class="fas fa-car"></i> Make:</th>
+                                    <td>{{ car.make }}</td>
+                                </tr>
+                                <tr>
+                                    <th><i class="fas fa-tag"></i> Model:</th>
+                                    <td>{{ car.model }}</td>
+                                </tr>
+                                <tr>
+                                    <th><i class="fas fa-palette"></i> Color:</th>
+                                    <td>{{ car.color|default:"Not specified" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table">
+                                <tr>
+                                    <th><i class="fas fa-tachometer-alt"></i> Mileage:</th>
+                                    <td>{{ car.mileage|default:"Not specified" }} km</td>
+                                </tr>
+                                <tr>
+                                    <th><i class="fas fa-cogs"></i> Transmission:</th>
+                                    <td>{{ car.get_transmission_display }}</td>
+                                </tr>
+                                <tr>
+                                    <th><i class="fas fa-gas-pump"></i> Fuel Type:</th>
+                                    <td>{{ car.get_fuel_type_display }}</td>
+                                </tr>
+                                <tr>
+                                    <th><i class="fas fa-clock"></i> Posted:</th>
+                                    <td>{{ car.date_posted|date:"M d, Y" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    {% if car.description %}
+                    <div class="mt-4">
+                        <h5><i class="fas fa-align-left"></i> Description</h5>
+                        <p>{{ car.description }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Price & Contact -->
+            <div class="card shadow-sm mb-4 sticky-top" style="top: 20px;">
+                <div class="card-body">
+                    <h3 class="text-primary mb-3">${{ car.price|floatformat:0 }}</h3>
+                    
+                    <div class="mb-3">
+                        <h6><i class="fas fa-user"></i> Seller Information</h6>
+                        <p class="mb-1"><strong>{{ car.seller.get_full_name|default:car.seller.username }}</strong></p>
+                        {% if user_is_guest %}
+                        <!-- Masked information for guest users -->
+                        {% if car.seller.email %}
+                        <p class="mb-1 small text-muted">
+                            <i class="fas fa-envelope"></i> 
+                            <span class="text-warning">Email hidden - Sign up to view</span>
+                        </p>
+                        {% endif %}
+                        {% if car.seller.phone %}
+                        <p class="mb-1 small text-muted">
+                            <i class="fas fa-phone"></i> 
+                            <span class="text-warning">+XX XXXXXXXXXX</span>
+                        </p>
+                        {% endif %}
+                        {% if car.seller.city %}
+                        <p class="mb-1 small"><i class="fas fa-map-marker-alt"></i> {{ car.seller.city }}</p>
+                        {% endif %}
+                        <div class="alert alert-warning mt-3 small">
+                            <i class="fas fa-info-circle"></i> 
+                            <a href="{% url 'register' %}" class="alert-link">Sign up</a> or 
+                            <a href="{% url 'login' %}" class="alert-link">login</a> to view contact details
+                        </div>
+                        {% else %}
+                        <!-- Full information for registered users -->
+                        {% if car.seller.email %}
+                        <p class="mb-1 small"><i class="fas fa-envelope"></i> {{ car.seller.email }}</p>
+                        {% endif %}
+                        {% if car.seller.phone %}
+                        <p class="mb-1 small"><i class="fas fa-phone"></i> {{ car.seller.phone }}</p>
+                        {% endif %}
+                        {% if car.seller.city %}
+                        <p class="mb-1 small"><i class="fas fa-map-marker-alt"></i> {{ car.seller.city }}</p>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                    
+                    {% if user.is_authenticated and user == car.seller %}
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'car_update' car.pk %}" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Edit Listing
+                        </a>
+                        <a href="{% url 'car_delete' car.pk %}" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Delete Listing
+                        </a>
+                    </div>
+                    {% elif user_is_guest %}
+                    <div class="d-grid">
+                        <button class="btn btn-secondary" disabled>
+                            <i class="fas fa-lock"></i> Contact Hidden
+                        </button>
+                        <small class="text-muted text-center mt-2">
+                            <a href="{% url 'register' %}">Sign up</a> to contact seller
+                        </small>
+                    </div>
+                    {% else %}
+                    <div class="d-grid gap-2">
+                        {% if car.seller.email %}
+                        <a href="mailto:{{ car.seller.email }}?subject=Interest in {{ car.year }} {{ car.make }} {{ car.model }}" 
+                           class="btn btn-primary">
+                            <i class="fas fa-envelope"></i> Contact Seller
+                        </a>
+                        {% endif %}
+                        
+                        <!-- Inspection Request Button (Buyers Only) -->
+                        {% if user.is_buyer %}
+                        <hr class="my-3">
+                        <h6 class="text-muted small"><i class="fas fa-clipboard-check"></i> Vehicle Inspection</h6>
+                        {% if can_request_inspection %}
+                        <a href="{% url 'request_inspection' car.pk %}" class="btn btn-success">
+                            <i class="fas fa-search-plus"></i> Request Inspection
+                        </a>
+                        <small class="text-muted d-block mt-2">
+                            Get a professional inspection ($50)
+                        </small>
+                        {% else %}
+                        <button class="btn btn-secondary" disabled>
+                            <i class="fas fa-clock"></i> Inspection Requested
+                        </button>
+                        <small class="text-muted d-block mt-2">
+                            A recent inspection was requested for this vehicle (30-day limit)
+                        </small>
+                        {% endif %}
+                        <a href="{% url 'buyer_inspection_status' %}" class="btn btn-outline-primary btn-sm mt-2">
+                            <i class="fas fa-list"></i> My Inspection Requests
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Inspection Reports Section (Visible to All Users) -->
+    {% if completed_inspections %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-certificate"></i> Professional Inspection Reports ({{ completed_inspections.count }})</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">This vehicle has been professionally inspected. View detailed reports below.</p>
+                    
+                    {% for inspection in completed_inspections %}
+                    <div class="card mb-3">
+                        <div class="card-header bg-light">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-file-alt"></i> Inspection ID: <code>{{ inspection.inspection_id }}</code>
+                                    </h6>
+                                    <small class="text-muted">
+                                        Completed on {{ inspection.report.completed_date|date:"M d, Y" }} by 
+                                        <strong>{{ inspection.inspector.get_full_name|default:inspection.inspector.username }}</strong>
+                                    </small>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <a href="{% url 'view_inspection_report' inspection.inspection_id %}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-eye"></i> View Full Report
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="text-center">
+                                        <h3 class="text-primary mb-0">{{ inspection.report.average_rating|floatformat:1 }}</h3>
+                                        <small class="text-muted">out of 5.0</small>
+                                        <div class="mt-2">
+                                            {% with rating=inspection.report.average_rating|floatformat:0 %}
+                                            {% for i in "12345" %}
+                                                {% if forloop.counter <= rating|add:"0" %}
+                                                <i class="fas fa-star text-warning"></i>
+                                                {% else %}
+                                                <i class="far fa-star text-warning"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                            {% endwith %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <h6>Component Ratings:</h6>
+                                    <div class="row small">
+                                        <div class="col-md-6">
+                                            <ul class="list-unstyled mb-0">
+                                                <li><i class="fas fa-check-circle text-success"></i> Paint: {{ inspection.report.get_paint_condition_display }}</li>
+                                                <li><i class="fas fa-check-circle text-success"></i> Body: {{ inspection.report.get_body_condition_display }}</li>
+                                                <li><i class="fas fa-check-circle text-success"></i> Engine: {{ inspection.report.get_engine_condition_display }}</li>
+                                                <li><i class="fas fa-check-circle text-success"></i> Transmission: {{ inspection.report.get_transmission_display }}</li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <ul class="list-unstyled mb-0">
+                                                <li><i class="fas fa-check-circle text-success"></i> Brakes: {{ inspection.report.get_brakes_display }}</li>
+                                                <li><i class="fas fa-check-circle text-success"></i> Tires: {{ inspection.report.get_tire_condition_display }}</li>
+                                                <li><i class="fas fa-check-circle text-success"></i> Interior: {{ inspection.report.get_interior_condition_display }}</li>
+                                                <li><i class="fas fa-check-circle text-success"></i> Electronics: {{ inspection.report.get_electronics_display }}</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    
+                                    {% if inspection.report.photos.all %}
+                                    <div class="mt-3">
+                                        <h6>Inspection Photos ({{ inspection.report.photos.count }}):</h6>
+                                        <div class="row">
+                                            {% for photo in inspection.report.photos.all|slice:":3" %}
+                                            <div class="col-4">
+                                                <img src="{{ photo.image.url }}" class="img-fluid rounded" alt="{{ photo.caption }}" style="max-height: 100px; object-fit: cover; width: 100%;">
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                        {% if inspection.report.photos.count > 3 %}
+                                        <small class="text-muted">+ {{ inspection.report.photos.count|add:"-3" }} more photos in full report</small>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+</div>
+{% endblock %}

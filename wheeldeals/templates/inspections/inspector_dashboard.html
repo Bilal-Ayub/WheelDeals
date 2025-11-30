@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Inspector Dashboard - WheelDeals{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4"><i class="fas fa-tools"></i> Inspector Dashboard</h2>
+    
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- Unassigned Inspections -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-clipboard-list"></i> Available Inspections (Unassigned)</h5>
+        </div>
+        <div class="card-body">
+            {% if unassigned_inspections %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Inspection ID</th>
+                            <th>Vehicle</th>
+                            <th>Scheduled Date</th>
+                            <th>Time Slot</th>
+                            <th>Cost</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for inspection in unassigned_inspections %}
+                        <tr>
+                            <td><code>{{ inspection.inspection_id }}</code></td>
+                            <td>
+                                <a href="{% url 'car_detail' inspection.car.pk %}">
+                                    {{ inspection.car.year }} {{ inspection.car.make }} {{ inspection.car.model }}
+                                </a>
+                            </td>
+                            <td>{{ inspection.scheduled_date|date:"M d, Y" }}</td>
+                            <td>{{ inspection.get_scheduled_time_slot_display }}</td>
+                            <td>${{ inspection.inspection_cost }}</td>
+                            <td><span class="badge bg-primary">Scheduled</span></td>
+                            <td>
+                                <a href="{% url 'assign_inspection' inspection.inspection_id %}" class="btn btn-success btn-sm">
+                                    <i class="fas fa-hand-paper"></i> Assign to Me
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info mb-0">
+                <i class="fas fa-info-circle"></i> No unassigned inspections available at this time.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- My Assigned Inspections -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0"><i class="fas fa-tasks"></i> My Assigned Inspections</h5>
+        </div>
+        <div class="card-body">
+            {% if assigned_inspections %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Inspection ID</th>
+                            <th>Vehicle</th>
+                            <th>Scheduled Date</th>
+                            <th>Time Slot</th>
+                            <th>Cost</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for inspection in assigned_inspections %}
+                        <tr>
+                            <td><code>{{ inspection.inspection_id }}</code></td>
+                            <td>
+                                <a href="{% url 'car_detail' inspection.car.pk %}">
+                                    {{ inspection.car.year }} {{ inspection.car.make }} {{ inspection.car.model }}
+                                </a>
+                            </td>
+                            <td>{{ inspection.scheduled_date|date:"M d, Y" }}</td>
+                            <td>{{ inspection.get_scheduled_time_slot_display }}</td>
+                            <td>${{ inspection.inspection_cost }}</td>
+                            <td>
+                                {% if inspection.status == 'assigned' %}
+                                <span class="badge bg-secondary">Assigned</span>
+                                {% elif inspection.status == 'in_progress' %}
+                                <span class="badge bg-info">In Progress</span>
+                                {% elif inspection.status == 'completed' %}
+                                <span class="badge bg-success">Completed</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if inspection.status == 'assigned' %}
+                                <a href="{% url 'start_inspection' inspection.inspection_id %}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-play"></i> Start
+                                </a>
+                                {% elif inspection.status == 'in_progress' %}
+                                <a href="{% url 'submit_inspection_report' inspection.inspection_id %}" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-file-alt"></i> Submit Report
+                                </a>
+                                {% elif inspection.status == 'completed' %}
+                                <a href="{% url 'view_inspection_report' inspection.inspection_id %}" class="btn btn-success btn-sm">
+                                    <i class="fas fa-eye"></i> View Report
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info mb-0">
+                <i class="fas fa-info-circle"></i> You have no assigned inspections yet. Assign yourself to available inspections above.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

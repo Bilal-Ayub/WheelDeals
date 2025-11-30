@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}User Management - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2>User Management</h2>
+        </div>
+        <div class="col-md-6 text-end">
+            <div class="btn-group">
+                <a href="?role=" class="btn btn-sm {% if not role_filter %}btn-primary{% else %}btn-outline-primary{% endif %}">All Users</a>
+                <a href="?role=buyer" class="btn btn-sm {% if role_filter == 'buyer' %}btn-primary{% else %}btn-outline-primary{% endif %}">Buyers</a>
+                <a href="?role=seller" class="btn btn-sm {% if role_filter == 'seller' %}btn-primary{% else %}btn-outline-primary{% endif %}">Sellers</a>
+                <a href="?role=inspector" class="btn btn-sm {% if role_filter == 'inspector' %}btn-primary{% else %}btn-outline-primary{% endif %}">Inspectors</a>
+                <a href="?role=admin" class="btn btn-sm {% if role_filter == 'admin' %}btn-primary{% else %}btn-outline-primary{% endif %}">Admins</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>City</th>
+                    <th>Joined</th>
+                    <th>Last Login</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.get_full_name|default:"-" }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <span class="badge 
+                            {% if user.role == 'admin' %}bg-danger
+                            {% elif user.role == 'inspector' %}bg-success
+                            {% elif user.role == 'seller' %}bg-warning
+                            {% else %}bg-primary{% endif %}">
+                            {{ user.get_role_display }}
+                        </span>
+                    </td>
+                    <td>{{ user.city|default:"-" }}</td>
+                    <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                    <td>{{ user.last_login|date:"M d, Y"|default:"Never" }}</td>
+                    <td>
+                        <a href="{% url 'admin_edit_user_role' user.id %}" class="btn btn-sm btn-warning">
+                            <i class="fas fa-edit"></i> Edit Role
+                        </a>
+                        {% if user.id != request.user.id %}
+                        <a href="{% url 'admin_delete_user' user.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Delete this user?')">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary mt-3">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+{% endblock %}

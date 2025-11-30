@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}All Listings - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2>All Car Listings</h2>
+        </div>
+        <div class="col-md-6 text-end">
+            <div class="btn-group">
+                <a href="?" class="btn btn-sm {% if status_filter == 'all' %}btn-primary{% else %}btn-outline-primary{% endif %}">All</a>
+                <a href="?status=pending" class="btn btn-sm {% if status_filter == 'pending' %}btn-warning{% else %}btn-outline-warning{% endif %}">Pending</a>
+                <a href="?status=published" class="btn btn-sm {% if status_filter == 'published' %}btn-success{% else %}btn-outline-success{% endif %}">Published</a>
+                <a href="?status=declined" class="btn btn-sm {% if status_filter == 'declined' %}btn-danger{% else %}btn-outline-danger{% endif %}">Declined</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Image</th>
+                    <th>Car Details</th>
+                    <th>Seller</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Posted</th>
+                    <th>Views</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for car in cars %}
+                <tr>
+                    <td>{{ car.id }}</td>
+                    <td>
+                        {% if car.image1 %}
+                        <img src="{{ car.image1.url }}" alt="{{ car }}" class="img-thumbnail" style="width: 60px; height: 45px; object-fit: cover;">
+                        {% else %}
+                        <div class="bg-secondary text-white text-center" style="width: 60px; height: 45px; line-height: 45px; font-size: 10px;">No Img</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <strong>{{ car.year }} {{ car.make }} {{ car.model }}</strong><br>
+                        <small class="text-muted">{{ car.mileage|default:"N/A" }} km</small>
+                    </td>
+                    <td>{{ car.seller.get_full_name|default:car.seller.username }}</td>
+                    <td><strong>${{ car.price|floatformat:0 }}</strong></td>
+                    <td>
+                        <span class="badge 
+                            {% if car.status == 'published' %}bg-success
+                            {% elif car.status == 'pending' %}bg-warning
+                            {% else %}bg-danger{% endif %}">
+                            {{ car.get_status_display }}
+                        </span>
+                    </td>
+                    <td>{{ car.date_posted|date:"M d, Y" }}</td>
+                    <td>{{ car.views }}</td>
+                    <td>
+                        <a href="{% url 'car_detail' car.id %}" class="btn btn-sm btn-info" target="_blank">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                        <form method="post" action="{% url 'admin_delete_ad' car.id %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Permanently delete this listing?')">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    {% if not cars %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> No listings found for the selected filter.
+    </div>
+    {% endif %}
+    
+    <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary mt-3">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+{% endblock %}

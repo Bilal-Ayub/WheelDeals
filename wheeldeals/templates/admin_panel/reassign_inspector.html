@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Reassign Inspector - Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Reassign Inspector</h2>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">Inspection Details</h5>
+        </div>
+        <div class="card-body">
+            <p><strong>Inspection ID:</strong> <code>{{ inspection.inspection_id }}</code></p>
+            <p><strong>Car:</strong> {{ inspection.car.year }} {{ inspection.car.make }} {{ inspection.car.model }}</p>
+            <p><strong>Buyer:</strong> {{ inspection.buyer.get_full_name|default:inspection.buyer.username }}</p>
+            <p><strong>Current Inspector:</strong> 
+                {% if inspection.inspector %}
+                {{ inspection.inspector.get_full_name|default:inspection.inspector.username }}
+                {% else %}
+                <span class="text-muted">Not assigned</span>
+                {% endif %}
+            </p>
+            <p><strong>Status:</strong> <span class="badge bg-warning">{{ inspection.get_status_display }}</span></p>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="inspector_id" class="form-label">Select New Inspector <span class="text-danger">*</span></label>
+                    <select name="inspector_id" id="inspector_id" class="form-select" required>
+                        <option value="">-- Select Inspector --</option>
+                        {% for inspector in inspectors %}
+                        <option value="{{ inspector.id }}" {% if inspection.inspector.id == inspector.id %}selected{% endif %}>
+                            {{ inspector.get_full_name|default:inspector.username }} ({{ inspector.email }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-warning">
+                    <i class="fas fa-exchange-alt"></i> Reassign Inspector
+                </button>
+                <a href="{% url 'admin_inspection_oversight' %}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

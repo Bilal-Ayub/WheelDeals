@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block title %}WheelDeals - Buy and Sell Cars Effortlessly{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-light py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold">Welcome to WheelDeals</h1>
+                <p class="lead">Buy and sell cars - <span class="text-dark fw-normal">effortlessly</span></p>
+                <p class="text-muted">Find your dream car or sell your vehicle with ease. Join thousands of satisfied users.</p>
+                
+                <div class="mt-4" style="max-width: 500px;">
+                    {% if user.is_authenticated and not user.is_guest %}
+                    <!-- Logged in regular user - show based on role -->
+                    <div class="d-grid gap-3">
+                        <a href="{% url 'car_list' %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-search"></i> Browse Cars
+                        </a>
+                        {% if user.is_seller %}
+                        <a href="{% url 'car_create' %}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-plus-circle"></i> Sell Your Car
+                        </a>
+                        {% else %}
+                        <a href="{% url 'profile' %}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-user"></i> My Profile
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% elif user.is_authenticated and user.is_guest %}
+                    <!-- Logged in as guest -->
+                    <div class="d-grid gap-3">
+                        <a href="{% url 'car_list' %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-search"></i> Browse Cars
+                        </a>
+                        <a href="{% url 'register' %}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-user-plus"></i> Sign Up to Sell
+                        </a>
+                    </div>
+                    {% else %}
+                    <!-- Not logged in - show Sign Up, Log In, Continue as guest -->
+                    <div class="d-grid gap-3">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <a href="{% url 'register' %}" class="btn btn-outline-primary btn-lg w-100">
+                                    Sign Up
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="{% url 'login' %}" class="btn btn-primary btn-lg w-100">
+                                    Log In
+                                </a>
+                            </div>
+                        </div>
+                        <a href="{% url 'continue_as_guest' %}" class="btn btn-outline-primary btn-lg w-100">
+                            Continue as guest
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="fas fa-car fa-10x text-primary opacity-25"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-4 bg-dark text-white">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-4">
+                <h2 class="display-5">{{ total_cars }}+</h2>
+                <p>Cars Available</p>
+            </div>
+            <div class="col-md-4">
+                <h2 class="display-5">1000+</h2>
+                <p>Happy Customers</p>
+            </div>
+            <div class="col-md-4">
+                <h2 class="display-5">24/7</h2>
+                <p>Support</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Cars Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold">Recent Listings</h2>
+            <a href="{% url 'car_list' %}" class="btn btn-outline-primary">
+                View All <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        
+        {% if recent_cars %}
+        <div class="row g-4">
+            {% for car in recent_cars %}
+            <div class="col-md-6 col-lg-3">
+                <div class="card shadow-sm">
+                    {% if car.image1 %}
+                    <img src="{{ car.image1.url }}" class="card-img-top car-card-img" alt="{{ car }}">
+                    {% else %}
+                    <div class="car-card-img bg-secondary d-flex align-items-center justify-content-center">
+                        <i class="fas fa-car fa-4x text-white"></i>
+                    </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ car.year }} {{ car.make }}</h5>
+                        <p class="card-text text-muted">{{ car.model }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="h5 text-primary mb-0">${{ car.price|floatformat:0 }}</span>
+                            <a href="{% url 'car_detail' car.pk %}" class="btn btn-sm btn-outline-primary">
+                                View Details
+                            </a>
+                        </div>
+                        <div class="mt-2 small text-muted">
+                            <i class="fas fa-tachometer-alt"></i> {{ car.mileage|default:"N/A" }} km
+                            <span class="ms-2"><i class="fas fa-gas-pump"></i> {{ car.get_fuel_type_display }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> No cars listed yet. Be the first to <a href="{% url 'car_create' %}">post a car</a>!
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center fw-bold mb-5">How It Works</h2>
+        <div class="row g-4">
+            <div class="col-md-4 text-center">
+                <div class="mb-3">
+                    <i class="fas fa-user-plus fa-4x text-primary"></i>
+                </div>
+                <h4>1. Sign Up</h4>
+                <p class="text-muted">Create your free account in seconds</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="mb-3">
+                    <i class="fas fa-search fa-4x text-primary"></i>
+                </div>
+                <h4>2. Browse or List</h4>
+                <p class="text-muted">Search for cars or post your own listing</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="mb-3">
+                    <i class="fas fa-handshake fa-4x text-primary"></i>
+                </div>
+                <h4>3. Connect & Deal</h4>
+                <p class="text-muted">Connect with sellers/buyers and close the deal</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container text-center">
+        <h2 class="fw-bold mb-3">Ready to Get Started?</h2>
+        <p class="lead mb-4">Join WheelDeals today and find your perfect car or reach thousands of buyers!</p>
+        {% if not user.is_authenticated %}
+        <a href="{% url 'register' %}" class="btn btn-warning btn-lg">
+            <i class="fas fa-user-plus"></i> Sign Up Now
+        </a>
+        {% else %}
+        <a href="{% url 'car_create' %}" class="btn btn-warning btn-lg">
+            <i class="fas fa-plus-circle"></i> List Your Car
+        </a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
